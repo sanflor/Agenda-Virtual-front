@@ -1,7 +1,8 @@
-import { Component, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterModule, Router } from '@angular/router';
+import { Component, OnInit, inject } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { ContactService } from '../services/contact.service';
+import { Contact } from '../model/contact.interface';
 
 
 @Component({
@@ -11,21 +12,47 @@ import { ContactService } from '../services/contact.service';
   templateUrl: './contact-form.component.html',
   styleUrl: './contact-form.component.css'
 })
-export default class ContactFormComponent {
+export default class ContactFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private route = inject(ActivatedRoute)
   private contactService = inject(ContactService);
+  
+  form?: FormGroup; 
+  contact?: Contact;
 
-  form = this.fb.group({
-    name: ['', [Validators.required]],
-    email: ['', [Validators.required]],
-  });
-
-  create() {
-    const contact = this.form.value;
-    this.contactService.create(contact).subscribe(() => {
-      this.router.navigate(['/']);
-    });
+  ngOnInit(): void {
+    const id =  this.route.snapshot.paramMap.get('id');
+    
+    if (id){
+      this.contactService.get(parseInt(id)).subscribe(contact => {
+        this.contact = contact;
+        this.form = this.fb.group({
+          name: [contact.name, [Validators.required]],
+          email: [contact.email, [Validators.required]],
+        });
+        console.log('c', contact);
+      })
+    }else{
+      this.form = this.fb.group({
+        name: ['', [Validators.required]],
+        email: ['', [Validators.required]],
+      });
+    }
   }
 
+  save() {
+    const contactForm = this.form!.value;
+
+    if (this.contact){
+      this.contactService.update(this.contact.id, contactForm).subscribe(() => {
+        this.router.navigate(['/']);
+      });
+
+    }else{
+      this.contactService.create(contactForm).subscribe(() => {
+        this.router.navigate(['/']);
+      });
+    }
+  }
 }

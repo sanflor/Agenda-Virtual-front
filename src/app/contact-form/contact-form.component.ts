@@ -29,19 +29,25 @@ export default class ContactFormComponent implements OnInit {
         this.contact = contact;
         this.form = this.fb.group({
           name: [contact.name, [Validators.required]],
-          email: [contact.email, [Validators.required]],
+          email: [contact.email, [Validators.required, Validators.email]],
         });
         console.log('c', contact);
       })
     }else{
       this.form = this.fb.group({
-        name: ['', [Validators.required]],
-        email: ['', [Validators.required]],
+        //name: ['', [Validators.required]],
+        //email: ['', [Validators.required, Validators.email]],
+        name: ['', []],
+        email: ['', []],
       });
     }
   }
 
   save() {
+    if (this.form?.invalid){
+      return;
+    }
+
     const contactForm = this.form!.value;
 
     if (this.contact){

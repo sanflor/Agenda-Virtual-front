@@ -1,0 +1,7 @@
+.text-end .btn {
+    margin-right: 8px; /* Añade un margen a la derecha de cada botón */
+}
+
+.text-end .btn:last-child {
+    margin-right: 0; /* Elimina el margen derecho del último botón para evitar espacio extra al final */
+}
